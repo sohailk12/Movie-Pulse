@@ -1,0 +1,37 @@
+.card-container{
+  width:10%;
+  height: 100px;
+  padding: 50px;
+  background-color:black;
+  border: 1px solid rgba(0, 0, 0, 0.74);
+  border-radius: 10px;
+  box-shadow: 0 0 10px gray;
+}
+
+.liked{
+cursor: pointer;
+color: black;
+background-color:greenyellow;
+border: 1px solid green;
+box-shadow: 0 0 5px yellow;
+border-radius: 5px;
+padding: 5px;
+}
+
+.like{
+cursor: pointer;
+background-color:royalblue;
+border: 1px solid royalblue;
+box-shadow: 0 0 5px royalblue;
+border-radius: 5px;
+padding: 5px;
+}
+
+.main{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  padding: 50px;
+  flex-wrap: wrap;
+}
