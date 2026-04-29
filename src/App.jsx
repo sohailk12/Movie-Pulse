@@ -19,24 +19,24 @@ const App = () => {
   const [isloading, setIsLoading] = useState(false);
   const [errorMessage,setErrorMessage] = useState('');
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (signal) => {
     setIsLoading(true);
     setErrorMessage('');
     try {
       const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
-      const response = await fetch(endpoint, API_OPTIONS);
+      const response = await fetch(endpoint, { ...API_OPTIONS, signal });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      if(data.response === 'False') {
-        throw new Error(data.error || 'Failed to fetch movies.');
+      if (data.success === false) {
         setMovies([]);
-        return;
+        throw new Error(data.status_message || 'Failed to fetch movies.');
       }
-      setMovies(data.results || []);
+      setMovies(Array.isArray(data.results) ? data.results : []);
       setErrorMessage('');
     } catch (error) {
+      if (error.name === 'AbortError') return;
       console.error('Error fetching movies:', error);
       setErrorMessage(error.message || 'An error occurred while fetching movies.');
     } finally {
@@ -44,7 +44,9 @@ const App = () => {
     }
   };
   useEffect(() => {
-    fetchMovies();
+   const controller = new AbortController();
+    fetchMovies(controller.signal);
+    return () => controller.abort();
   }, []);
 
   return (
