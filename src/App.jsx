@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useDebounce } from "react-use";
 import Search from "./components/Search"
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
@@ -20,12 +21,22 @@ const App = () => {
   const [isloading, setIsLoading] = useState(false);
   const [errorMessage,setErrorMessage] = useState('');
 
-  const fetchMovies = async (signal) => {
+  const [debouncedSearchTerm,setDebouncedSearcTerm] = useState('');
+
+  useDebounce(() => {
+    setDebouncedSearcTerm(searchTerm);
+  },1000,[searchTerm]);
+
+  const fetchMovies = async (query='') => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
-      const response = await fetch(endpoint, { ...API_OPTIONS, signal });
+      console.log()
+      const endpoint = query ? 
+      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&api_key=${API_KEY}`
+      :
+      `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+      const response = await fetch(endpoint, { ...API_OPTIONS });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -45,10 +56,8 @@ const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key
     }
   };
   useEffect(() => {
-   const controller = new AbortController();
-    fetchMovies(controller.signal);
-    return () => controller.abort();
-  }, []);
+    fetchMovies(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   return (
     <main>
