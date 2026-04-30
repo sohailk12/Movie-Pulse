@@ -3,6 +3,7 @@ import { useDebounce } from "react-use";
 import Search from "./components/Search"
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
+import { updateSearchCount } from "./appwrite";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -27,16 +28,16 @@ const App = () => {
     setDebouncedSearcTerm(searchTerm);
   },1000,[searchTerm]);
 
-  const fetchMovies = async (query='') => {
+  const fetchMovies = async (query='',signal) => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      console.log()
-      const endpoint = query ? 
-      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&api_key=${API_KEY}`
+      const normalizedQuery = query.trim();
+      const endpoint = normalizedQuery ? 
+      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(normalizedQuery)}&api_key=${API_KEY}`
       :
       `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
-      const response = await fetch(endpoint, { ...API_OPTIONS });
+      const response = await fetch(endpoint, { ...API_OPTIONS,signal });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -47,6 +48,7 @@ const App = () => {
       }
       setMovies(Array.isArray(data.results) ? data.results : []);
       setErrorMessage('');
+      updateSearchCount();
     } catch (error) {
       if (error.name === 'AbortError') return;
       console.error('Error fetching movies:', error);
@@ -56,7 +58,9 @@ const App = () => {
     }
   };
   useEffect(() => {
-    fetchMovies(debouncedSearchTerm);
+    const controller = new AbortController();
+    fetchMovies(debouncedSearchTerm,controller.signal);
+    return () => controller.abort();
   }, [debouncedSearchTerm]);
 
   return (
