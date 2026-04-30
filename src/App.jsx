@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
+import { useDebounce } from "react-use";
 import Search from "./components/Search"
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
+import { updateSearchCount } from "./appwrite";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -20,12 +22,22 @@ const App = () => {
   const [isloading, setIsLoading] = useState(false);
   const [errorMessage,setErrorMessage] = useState('');
 
-  const fetchMovies = async (signal) => {
+  const [debouncedSearchTerm,setDebouncedSearcTerm] = useState('');
+
+  useDebounce(() => {
+    setDebouncedSearcTerm(searchTerm);
+  },1000,[searchTerm]);
+
+  const fetchMovies = async (query='',signal) => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
-      const response = await fetch(endpoint, { ...API_OPTIONS, signal });
+      const normalizedQuery = query.trim();
+      const endpoint = normalizedQuery ? 
+      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(normalizedQuery)}&api_key=${API_KEY}`
+      :
+      `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
+      const response = await fetch(endpoint, { ...API_OPTIONS,signal });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -36,6 +48,7 @@ const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key
       }
       setMovies(Array.isArray(data.results) ? data.results : []);
       setErrorMessage('');
+      updateSearchCount();
     } catch (error) {
       if (error.name === 'AbortError') return;
       console.error('Error fetching movies:', error);
@@ -45,10 +58,10 @@ const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key
     }
   };
   useEffect(() => {
-   const controller = new AbortController();
-    fetchMovies(controller.signal);
+    const controller = new AbortController();
+    fetchMovies(debouncedSearchTerm,controller.signal);
     return () => controller.abort();
-  }, []);
+  }, [debouncedSearchTerm]);
 
   return (
     <main>
