@@ -7,8 +7,7 @@ const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const API_OPTIONS = {
   method: 'GET',
   headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${API_KEY}`
+    accept: 'application/json'
   }
 };
 
@@ -23,7 +22,7 @@ const App = () => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+const endpoint = `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&api_key=${API_KEY}`;
       const response = await fetch(endpoint, { ...API_OPTIONS, signal });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
