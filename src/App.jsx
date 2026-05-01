@@ -48,7 +48,9 @@ const App = () => {
       }
       setMovies(Array.isArray(data.results) ? data.results : []);
       setErrorMessage('');
-      updateSearchCount();
+      if(normalizedQuery && data.results.length > 0){
+          await updateSearchCount(normalizedQuery,data.results[0]);
+      }
     } catch (error) {
       if (error.name === 'AbortError') return;
       console.error('Error fetching movies:', error);
