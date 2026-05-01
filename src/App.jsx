@@ -3,7 +3,7 @@ import { useDebounce } from "react-use";
 import Search from "./components/Search"
 import Spinner from "./components/Spinner";
 import MovieCard from "./components/MovieCard";
-import { updateSearchCount } from "./appwrite";
+import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -24,6 +24,8 @@ const App = () => {
 
   const [debouncedSearchTerm,setDebouncedSearcTerm] = useState('');
 
+  const [trendingMovies,setTrendingMovies] = useState([]);
+  console.log('trendingMovies',trendingMovies);
   useDebounce(() => {
     setDebouncedSearcTerm(searchTerm);
   },1000,[searchTerm]);
@@ -59,12 +61,26 @@ const App = () => {
       setIsLoading(false);
     }
   };
+
+  const loadTrendingMovies = async ()=>{
+    try {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+
+    } catch (error) {
+      console.error('Error Fetching Trending Movies',error);
+      return[];
+    }
+  }
   useEffect(() => {
     const controller = new AbortController();
     fetchMovies(debouncedSearchTerm,controller.signal);
     return () => controller.abort();
   }, [debouncedSearchTerm]);
 
+  useEffect(()=>{
+    loadTrendingMovies();
+  },[])
   return (
     <main>
       <div className="pattern" />
@@ -74,8 +90,19 @@ const App = () => {
           <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy Without the Hassle</h1>
         <Search searchTerm ={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+{trendingMovies.length > 0 && ( <section className="trending">
+          <h2>Trending Movies</h2>
+          <ul>
+            {trendingMovies.map((movie, index) => (
+              <li key={movie.$id}>
+                <p>{index + 1}</p>
+                <img src={movie.poster_url} alt={movie.searchTerm||"Trending Movie Poster"} />
+              </li>
+            ))}
+          </ul>
+        </section>)}
         <section className="all-movies">
-          <h2 className="mt-10">All Movies</h2>
+          <h2>All Movies</h2>
           <ul>
             {isloading ? (
               <Spinner />
