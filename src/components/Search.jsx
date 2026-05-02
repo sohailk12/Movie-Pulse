@@ -18,8 +18,7 @@ const Search = ({searchTerm,setSearchTerm}) => {
               hover:bg-red-500 
               hover:text-white 
               hover:border-red-600 
-              p-1 px-3.5 py-1 
-              text-2xl 
+              px-2  
               border-2 rounded-full" 
               onClick={()=>setSearchTerm('')
               }>X</button>: ''
