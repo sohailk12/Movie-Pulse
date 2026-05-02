@@ -1,6 +1,7 @@
 
 const Search = ({searchTerm,setSearchTerm}) => {
   return (
+
     <div className="search">
         <div>
             <img src="/search.svg" alt="Search Icon" />
@@ -10,6 +11,19 @@ const Search = ({searchTerm,setSearchTerm}) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
              />
+             {
+              searchTerm.length>0 ? 
+              <button 
+              className="text-red-500 cursor-pointer 
+              hover:bg-red-500 
+              hover:text-white 
+              hover:border-red-600 
+              p-1 px-3.5 py-1 
+              text-2xl 
+              border-2 rounded-full" 
+              onClick={()=>setSearchTerm('')
+              }>X</button>: ''
+             }
         </div>
     </div>
   )

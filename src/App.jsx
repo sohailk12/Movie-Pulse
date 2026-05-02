@@ -69,7 +69,7 @@ const App = () => {
 
     } catch (error) {
       console.error('Error Fetching Trending Movies',error);
-      return[];
+        return[];
     }
   }
   useEffect(() => {
@@ -90,7 +90,8 @@ const App = () => {
           <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy Without the Hassle</h1>
         <Search searchTerm ={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
-{trendingMovies.length > 0 && ( <section className="trending">
+        {
+          searchTerm.length==0 && trendingMovies.length > 0 && ( <section className="trending">
           <h2>Trending Movies</h2>
           <ul>
             {trendingMovies.map((movie, index) => (
@@ -101,8 +102,9 @@ const App = () => {
             ))}
           </ul>
         </section>)}
+        
         <section className="all-movies">
-          <h2>All Movies</h2>
+          <h2 className={searchTerm.length>0 ? "mt-10":"mt-0"}>All Movies</h2>
           <ul>
             {isloading ? (
               <Spinner />
